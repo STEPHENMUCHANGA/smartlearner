@@ -1,0 +1,14 @@
+/* stylelint-disable at-rule-no-unknown */
+/* Tell editors/linters that Tailwind directives are valid */
+/* @type tailwindcss */
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+/* stylelint-enable at-rule-no-unknown */
+
+/* Optional: custom global styles */
+body {
+  background-color: rgb(249, 250, 251);
+  color: rgb(17, 24, 39);
+  font-family: ui-sans-serif, system-ui, sans-serif;
+}
