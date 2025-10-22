@@ -1,8 +1,7 @@
 // ======================================
-// 🌱 SMARTLEARNER BACKEND SERVER
+// 🌱 SMARTLEARNER BACKEND SERVER (FINAL)
 // ======================================
 
-// Load environment variables
 require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
@@ -10,6 +9,7 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const path = require("path");
 const passport = require("passport");
+const morgan = require("morgan");
 
 // Load Passport config
 require("./config/passport");
@@ -22,22 +22,24 @@ const PORT = process.env.PORT || 5000;
 // ======================================
 app.use(express.json());
 app.use(cookieParser());
+app.use(morgan("dev")); // helpful for debugging API calls
 
-// ✅ CORS Configuration (Frontend ↔ Backend)
+// ✅ Improved CORS Configuration
 const allowedOrigins = [
-  process.env.CLIENT_URL || "http://localhost:5173",
-  "https://smartlearner.vercel.app",
+  process.env.FRONTEND_URL || "http://localhost:5173",
+  process.env.FRONTEND_URL_PROD || "https://smartlearner.vercel.app",
 ];
 
 app.use(
   cors({
-    origin: function (origin, callback) {
+    origin: (origin, callback) => {
       // Allow tools like Postman (no origin)
       if (!origin) return callback(null, true);
       if (allowedOrigins.includes(origin)) return callback(null, true);
+      console.warn("❌ CORS blocked origin:", origin);
       return callback(new Error("Not allowed by CORS"), false);
     },
-    credentials: true,
+    credentials: true, // allow cookies / tokens
   })
 );
 
@@ -56,7 +58,7 @@ app.use("/api/courses", courseRoutes);
 app.use("/api/lessons", lessonRoutes);
 
 // ======================================
-// ✅ 3. Static File Handling
+// ✅ 3. Static Files (Uploads)
 // ======================================
 app.use(
   "/uploads",
@@ -79,10 +81,11 @@ app.get("/api", (req, res) => {
 // ✅ 5. Error Handling Middleware
 // ======================================
 app.use((err, req, res, next) => {
-  console.error("⚠️ Error:", err.message);
-  res
-    .status(err.status || 500)
-    .json({ success: false, message: err.message || "Internal server error" });
+  console.error("⚠️ Server Error:", err.stack || err.message);
+  res.status(err.status || 500).json({
+    success: false,
+    message: err.message || "Internal server error",
+  });
 });
 
 // ======================================
@@ -95,9 +98,7 @@ mongoose
   })
   .then(() => {
     console.log("✅ MongoDB connected successfully");
-    app.listen(PORT, () =>
-      console.log(`🚀 Server is running on port ${PORT}`)
-    );
+    app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
   })
   .catch((err) => {
     console.error("❌ MongoDB connection error:", err.message);
