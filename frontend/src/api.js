@@ -1,6 +1,5 @@
 import axios from "axios";
 
-// Decide automatically based on environment
 const baseURL =
   import.meta.env.MODE === "development"
     ? import.meta.env.VITE_API_BASE_URL
@@ -8,7 +7,7 @@ const baseURL =
 
 const api = axios.create({
   baseURL,
-  withCredentials: true, // allow cookies / CORS tokens
+  withCredentials: true,
 });
 
 export default api;
