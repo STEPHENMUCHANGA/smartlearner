@@ -1,58 +1,119 @@
-
 const express = require('express');
 const router = express.Router();
 const { body } = require('express-validator');
-const User = require('../models/User');
+const bcrypt = require('bcryptjs'); // ✅ make sure to hash passwords manually
 const jwt = require('jsonwebtoken');
+const User = require('../models/User');
 const validate = require('../middleware/validate');
 const passport = require('passport');
 
-router.post('/register', [
-  body('name').notEmpty(),
-  body('email').isEmail(),
-  body('password').isLength({ min:6 })
-], validate, async (req,res,next)=>{
-  try{
-    const { name, email, password } = req.body;
-    let user = await User.findOne({ email });
-    if(user) return res.status(400).json({ msg: 'Email already registered' });
-    user = new User({ name, email, password });
-    await user.save();
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
-    res.json({ token, user: { id: user._id, name: user.name, email: user.email } });
-  }catch(err){ next(err); }
-});
+// ===============================
+// ✅ REGISTER ROUTE
+// ===============================
+router.post(
+  '/register',
+  [
+    body('name').notEmpty().withMessage('Name is required'),
+    body('email').isEmail().withMessage('Valid email is required'),
+    body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
+  ],
+  validate,
+  async (req, res, next) => {
+    try {
+      const { name, email, password } = req.body;
 
-router.post('/login', [
-  body('email').isEmail(),
-  body('password').exists()
-], validate, async (req,res,next)=>{
-  try{
-    const { email, password } = req.body;
-    const user = await User.findOne({ email });
-    if(!user) return res.status(400).json({ msg: 'Invalid email or password' });
-    const match = await user.comparePassword(password);
-    if(!match) return res.status(400).json({ msg: 'Invalid email or password' });
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
-    res.json({ token, user: { id: user._id, name: user.name, email: user.email } });
-  }catch(err){ next(err); }
-});
+      let user = await User.findOne({ email });
+      if (user) return res.status(400).json({ message: 'Email already registered' });
 
-// Google OAuth endpoints
+      // ✅ hash password before saving
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      user = new User({ name, email, password: hashedPassword });
+      await user.save();
+
+      // ✅ create JWT token
+      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+
+      // ✅ send token as cookie + JSON
+      res
+        .cookie('token', token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+        })
+        .status(201)
+        .json({
+          message: 'Registration successful',
+          user: { id: user._id, name: user.name, email: user.email },
+        });
+    } catch (err) {
+      console.error('Registration error:', err);
+      res.status(500).json({ message: 'Registration failed' });
+    }
+  }
+);
+
+// ===============================
+// ✅ LOGIN ROUTE
+// ===============================
+router.post(
+  '/login',
+  [
+    body('email').isEmail().withMessage('Valid email is required'),
+    body('password').notEmpty().withMessage('Password is required'),
+  ],
+  validate,
+  async (req, res, next) => {
+    try {
+      const { email, password } = req.body;
+
+      const user = await User.findOne({ email });
+      if (!user) return res.status(400).json({ message: 'Invalid email or password' });
+
+      // ✅ compare hashed passwords
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch) return res.status(400).json({ message: 'Invalid email or password' });
+
+      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+
+      res
+        .cookie('token', token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+        })
+        .json({
+          message: 'Login successful',
+          user: { id: user._id, name: user.name, email: user.email },
+        });
+    } catch (err) {
+      console.error('Login error:', err);
+      res.status(500).json({ message: 'Login failed' });
+    }
+  }
+);
+
+// ===============================
+// ✅ GOOGLE AUTH (optional)
+// ===============================
 router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 
-router.get('/google/callback', (req,res,next) => {
+router.get('/google/callback', (req, res, next) => {
   passport.authenticate('google', { session: false }, (err, data) => {
-    if(err) return next(err);
+    if (err) return next(err);
     const { user, token } = data;
-    const frontend = process.env.FRONTEND_URL || 'http://localhost:5173';
-    const prod = process.env.FRONTEND_URL_PROD || '';
-    const redirectBase = (process.env.NODE_ENV === 'production' && prod) ? prod : frontend;
-    const redirectUrl = `${redirectBase}/login?token=${token}&user=${encodeURIComponent(JSON.stringify({
-      id: user._id, name: user.name, email: user.email
-    }))}`;
+
+    const frontend =
+      process.env.FRONTEND_URL_PROD ||
+      process.env.FRONTEND_URL ||
+      'http://localhost:5173';
+
+    const redirectUrl = `${frontend}/login?token=${token}&user=${encodeURIComponent(
+      JSON.stringify({ id: user._id, name: user.name, email: user.email })
+    )}`;
+
     res.redirect(redirectUrl);
-  })(req,res,next);
+  })(req, res, next);
 });
 
 module.exports = router;
