@@ -1,15 +1,7 @@
 import axios from "axios";
 
-// Dynamically pick the right base URL
-const baseURL =
-  import.meta.env.MODE === "development"
-    ? import.meta.env.VITE_API_URL
-    : import.meta.env.VITE_API_URL_PROD;
-
-console.log("📡 Using API base URL:", baseURL);
-
 const api = axios.create({
-  baseURL,
+  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api",
   withCredentials: true,
 });
 
