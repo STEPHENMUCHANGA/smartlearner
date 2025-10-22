@@ -1,7 +1,8 @@
 // ======================================
-// 🌱 SMARTLEARNER BACKEND SERVER (STABLE VERSION)
+// 🌱 SMARTLEARNER BACKEND SERVER (WORKING VERSION)
 // ======================================
 
+// Load environment variables
 require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
@@ -17,12 +18,12 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // ======================================
-// ✅ 1. Middleware Configuration
+// ✅ Middleware Configuration
 // ======================================
 app.use(express.json());
 app.use(cookieParser());
 
-// ✅ Simplified CORS (works for localhost + production)
+// ✅ Simplified CORS (localhost + production)
 app.use(
   cors({
     origin: [
@@ -37,7 +38,7 @@ app.use(
 app.use(passport.initialize());
 
 // ======================================
-// ✅ 2. API Routes
+// ✅ API Routes
 // ======================================
 const authRoutes = require("./routes/auth");
 const courseRoutes = require("./routes/courses");
@@ -48,7 +49,7 @@ app.use("/api/courses", courseRoutes);
 app.use("/api/lessons", lessonRoutes);
 
 // ======================================
-// ✅ 3. Static File Handling
+// ✅ Static Files
 // ======================================
 app.use(
   "/uploads",
@@ -56,7 +57,7 @@ app.use(
 );
 
 // ======================================
-// ✅ 4. Health Check Endpoint
+// ✅ Health Check
 // ======================================
 app.get("/api", (req, res) => {
   res.json({
@@ -66,7 +67,7 @@ app.get("/api", (req, res) => {
 });
 
 // ======================================
-// ✅ 5. Error Handling Middleware
+// ✅ Error Handler
 // ======================================
 app.use((err, req, res, next) => {
   console.error("Error:", err.message);
@@ -76,7 +77,7 @@ app.use((err, req, res, next) => {
 });
 
 // ======================================
-// ✅ 6. MongoDB Connection
+// ✅ MongoDB Connection
 // ======================================
 mongoose
   .connect(process.env.MONGO_URI, {
@@ -93,7 +94,7 @@ mongoose
   });
 
 // ======================================
-// ✅ 7. Graceful Shutdown
+// ✅ Graceful Shutdown
 // ======================================
 process.on("SIGINT", async () => {
   console.log("🛑 Gracefully shutting down...");
