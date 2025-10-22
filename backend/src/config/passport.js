@@ -1,13 +1,10 @@
-import passport from "passport";
-import { Strategy as GoogleStrategy } from "passport-google-oauth20";
-import User from "../models/User.js";
+const passport = require("passport");
+const { Strategy: GoogleStrategy } = require("passport-google-oauth20");
+const User = require("../models/User");
 
-export default function configurePassport() {
-  if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
-    console.warn("⚠️ Google OAuth credentials missing — skipping Google Strategy setup");
-    return;
-  }
-
+if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+  console.warn("⚠️ Google OAuth credentials missing — skipping Google Strategy setup");
+} else {
   passport.use(
     new GoogleStrategy(
       {
@@ -48,3 +45,5 @@ export default function configurePassport() {
     }
   });
 }
+
+module.exports = passport;
