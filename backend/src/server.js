@@ -16,6 +16,10 @@ require("./config/passport");
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// ADD THIS LINE ⬇️ right here
+app.set("trust proxy", 1); // Needed for Render/Vercel proxying cookies
+
+
 // ======================================
 // ✅ 1. Middleware Configuration
 // ======================================
@@ -23,6 +27,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 // ✅ Simplified + Explicit CORS Setup
+// ✅ Improved dynamic CORS setup
 const allowedOrigins = [
   process.env.FRONTEND_URL || "http://localhost:5173",
   process.env.FRONTEND_URL_PROD || "https://smartlearner.vercel.app",
@@ -30,10 +35,22 @@ const allowedOrigins = [
 
 app.use(
   cors({
-    origin: allowedOrigins,
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true); // allow tools like Postman
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      return callback(new Error("CORS policy violation"), false);
+    },
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
+// ✅ Request Logger for easier debugging
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
+  next();
+});
 
 // Initialize Passport
 app.use(passport.initialize());
@@ -99,6 +116,14 @@ mongoose
     console.error("❌ DB connection error:", err.message);
     process.exit(1);
   });
+
+  // ✅ Test Route (for quick debugging)
+app.get("/api/test-auth", (req, res) => {
+  res.json({
+    message: "Auth test route working",
+    timestamp: new Date().toISOString(),
+  });
+});
 
 // ======================================
 // ✅ 7. Graceful Shutdown
