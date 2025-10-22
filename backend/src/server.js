@@ -1,7 +1,8 @@
 // ======================================
-// 🌱 SMARTLEARNER BACKEND SERVER (FINAL)
+// 🌱 SMARTLEARNER BACKEND SERVER (STABLE VERSION)
 // ======================================
 
+// Load environment variables
 require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
@@ -9,7 +10,6 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const path = require("path");
 const passport = require("passport");
-const morgan = require("morgan");
 
 // Load Passport config
 require("./config/passport");
@@ -22,24 +22,15 @@ const PORT = process.env.PORT || 5000;
 // ======================================
 app.use(express.json());
 app.use(cookieParser());
-app.use(morgan("dev")); // helpful for debugging API calls
 
-// ✅ Improved CORS Configuration
-const allowedOrigins = [
-  process.env.FRONTEND_URL || "http://localhost:5173",
-  process.env.FRONTEND_URL_PROD || "https://smartlearner.vercel.app",
-];
-
+// ✅ Simplified CORS (supports localhost + production)
 app.use(
   cors({
-    origin: (origin, callback) => {
-      // Allow tools like Postman (no origin)
-      if (!origin) return callback(null, true);
-      if (allowedOrigins.includes(origin)) return callback(null, true);
-      console.warn("❌ CORS blocked origin:", origin);
-      return callback(new Error("Not allowed by CORS"), false);
-    },
-    credentials: true, // allow cookies / tokens
+    origin: [
+      "http://localhost:5173",
+      "https://smartlearner.vercel.app",
+    ],
+    credentials: true,
   })
 );
 
@@ -58,7 +49,7 @@ app.use("/api/courses", courseRoutes);
 app.use("/api/lessons", lessonRoutes);
 
 // ======================================
-// ✅ 3. Static Files (Uploads)
+// ✅ 3. Static File Handling
 // ======================================
 app.use(
   "/uploads",
@@ -70,10 +61,8 @@ app.use(
 // ======================================
 app.get("/api", (req, res) => {
   res.json({
-    success: true,
     message: "✅ SmartLearner API is running successfully",
     environment: process.env.NODE_ENV || "development",
-    timestamp: new Date().toISOString(),
   });
 });
 
@@ -81,11 +70,10 @@ app.get("/api", (req, res) => {
 // ✅ 5. Error Handling Middleware
 // ======================================
 app.use((err, req, res, next) => {
-  console.error("⚠️ Server Error:", err.stack || err.message);
-  res.status(err.status || 500).json({
-    success: false,
-    message: err.message || "Internal server error",
-  });
+  console.error("Error:", err.message);
+  res
+    .status(err.status || 500)
+    .json({ success: false, message: err.message || "Server error" });
 });
 
 // ======================================
@@ -101,7 +89,7 @@ mongoose
     app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
   })
   .catch((err) => {
-    console.error("❌ MongoDB connection error:", err.message);
+    console.error("❌ DB connection error:", err.message);
     process.exit(1);
   });
 
