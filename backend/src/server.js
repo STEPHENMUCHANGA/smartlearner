@@ -33,17 +33,21 @@ const allowedOrigins = [
 ];
 
 // ✅ CORS — explicit and reliable
+// Use environment-configured allowedOrigins defined above.
+// const allowedOrigins = [
+//   "http://localhost:5173",
+//   "https://smartlearner.vercel.app",
+// ];
+
 app.use(
   cors({
     origin: function (origin, callback) {
-      if (!origin) return callback(null, true); // allow Postman or backend requests
+      if (!origin) return callback(null, true); // allow Postman
       if (allowedOrigins.includes(origin)) return callback(null, true);
-      console.log("🚫 Blocked by CORS:", origin);
+      console.log("❌ CORS blocked:", origin);
       return callback(new Error("CORS policy violation"), false);
     },
-    credentials: true, // important for cookies and sessions
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
   })
 );
 
