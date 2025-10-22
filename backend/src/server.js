@@ -1,5 +1,5 @@
 // ======================================
-// 🌱 SMARTLEARNER BACKEND SERVER (STABLE + VERIFIED)
+// 🌱 SMARTLEARNER BACKEND SERVER (FINAL STABLE VERSION)
 // ======================================
 
 require("dotenv").config();
@@ -16,37 +16,38 @@ require("./config/passport");
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// ADD THIS LINE ⬇️ right here
-app.set("trust proxy", 1); // Needed for Render/Vercel proxying cookies
-
-
 // ======================================
 // ✅ 1. Middleware Configuration
 // ======================================
+
+// Needed for Vercel ↔ Render proxying and secure cookies
+app.set("trust proxy", 1);
+
 app.use(express.json());
 app.use(cookieParser());
 
-// ✅ Simplified + Explicit CORS Setup
-// ✅ Improved dynamic CORS setup
+// ✅ Dynamically allow both localhost + deployed frontend
 const allowedOrigins = [
   process.env.FRONTEND_URL || "http://localhost:5173",
   process.env.FRONTEND_URL_PROD || "https://smartlearner.vercel.app",
 ];
 
+// ✅ CORS — explicit and reliable
 app.use(
   cors({
     origin: function (origin, callback) {
-      if (!origin) return callback(null, true); // allow tools like Postman
+      if (!origin) return callback(null, true); // allow Postman or backend requests
       if (allowedOrigins.includes(origin)) return callback(null, true);
+      console.log("🚫 Blocked by CORS:", origin);
       return callback(new Error("CORS policy violation"), false);
     },
-    credentials: true,
+    credentials: true, // important for cookies and sessions
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
-// ✅ Request Logger for easier debugging
+// ✅ Basic Request Logger (for debugging)
 app.use((req, res, next) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
   next();
@@ -80,10 +81,18 @@ app.use(
 app.get("/api", (req, res) => {
   res.json({
     success: true,
-    message: "✅ SmartLearner API is running successfully",
+    message: "✅ SmartLearner API running successfully",
     environment: process.env.NODE_ENV || "development",
     frontend: allowedOrigins,
     timestamp: new Date().toISOString(),
+  });
+});
+
+// ✅ Quick Test Route for debugging CORS / Auth
+app.get("/api/test", (req, res) => {
+  res.json({
+    message: "SmartLearner backend test route working!",
+    date: new Date().toLocaleString(),
   });
 });
 
@@ -94,7 +103,7 @@ app.use((err, req, res, next) => {
   console.error("❌ Error:", err.message);
   res.status(err.status || 500).json({
     success: false,
-    message: err.message || "Server error",
+    message: err.message || "Internal server error",
   });
 });
 
@@ -116,14 +125,6 @@ mongoose
     console.error("❌ DB connection error:", err.message);
     process.exit(1);
   });
-
-  // ✅ Test Route (for quick debugging)
-app.get("/api/test-auth", (req, res) => {
-  res.json({
-    message: "Auth test route working",
-    timestamp: new Date().toISOString(),
-  });
-});
 
 // ======================================
 // ✅ 7. Graceful Shutdown
