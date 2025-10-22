@@ -1,12 +1,11 @@
 import axios from "axios";
 
-// Dynamically choose backend URL depending on environment
 const baseURL =
   import.meta.env.MODE === "development"
-    ? import.meta.env.VITE_API_URL // Local
-    : import.meta.env.VITE_API_URL_PROD; // Production
+    ? import.meta.env.VITE_API_URL
+    : import.meta.env.VITE_API_URL_PROD;
 
-console.log("🌍 Using API base URL:", baseURL);
+console.log("🌍 SmartLearner API Base URL:", baseURL);
 
 const api = axios.create({
   baseURL,
