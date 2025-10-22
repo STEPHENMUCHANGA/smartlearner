@@ -1,8 +1,7 @@
 // ======================================
-// 🌱 SMARTLEARNER BACKEND SERVER (STABLE VERSION)
+// 🌱 SMARTLEARNER BACKEND SERVER (STABLE + VERIFIED)
 // ======================================
 
-// Load environment variables
 require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
@@ -23,13 +22,15 @@ const PORT = process.env.PORT || 5000;
 app.use(express.json());
 app.use(cookieParser());
 
-// ✅ Simplified CORS (supports localhost + production)
+// ✅ Simplified + Explicit CORS Setup
+const allowedOrigins = [
+  process.env.FRONTEND_URL || "http://localhost:5173",
+  process.env.FRONTEND_URL_PROD || "https://smartlearner.vercel.app",
+];
+
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      "https://smartlearner.vercel.app",
-    ],
+    origin: allowedOrigins,
     credentials: true,
   })
 );
@@ -49,7 +50,7 @@ app.use("/api/courses", courseRoutes);
 app.use("/api/lessons", lessonRoutes);
 
 // ======================================
-// ✅ 3. Static File Handling
+// ✅ 3. Static Files
 // ======================================
 app.use(
   "/uploads",
@@ -61,8 +62,11 @@ app.use(
 // ======================================
 app.get("/api", (req, res) => {
   res.json({
+    success: true,
     message: "✅ SmartLearner API is running successfully",
     environment: process.env.NODE_ENV || "development",
+    frontend: allowedOrigins,
+    timestamp: new Date().toISOString(),
   });
 });
 
@@ -70,10 +74,11 @@ app.get("/api", (req, res) => {
 // ✅ 5. Error Handling Middleware
 // ======================================
 app.use((err, req, res, next) => {
-  console.error("Error:", err.message);
-  res
-    .status(err.status || 500)
-    .json({ success: false, message: err.message || "Server error" });
+  console.error("❌ Error:", err.message);
+  res.status(err.status || 500).json({
+    success: false,
+    message: err.message || "Server error",
+  });
 });
 
 // ======================================
@@ -86,7 +91,9 @@ mongoose
   })
   .then(() => {
     console.log("✅ MongoDB connected successfully");
-    app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+    app.listen(PORT, () =>
+      console.log(`🚀 Server running on port ${PORT}`)
+    );
   })
   .catch((err) => {
     console.error("❌ DB connection error:", err.message);
