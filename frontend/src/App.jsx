@@ -8,6 +8,29 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import { AuthProvider, AuthContext } from './context/AuthContext';
 
+// DebugBanner component to show backend connection status
+import React, { useEffect, useState } from "react";
+
+function DebugBanner() {
+  const [status, setStatus] = useState("Checking...");
+
+  useEffect(() => {
+    fetch(import.meta.env.VITE_API_BASE_URL + "/courses")
+      .then(res => {
+        if (res.ok) setStatus("✅ Connected to Backend API");
+        else setStatus("⚠️ Backend responded with error");
+      })
+      .catch(() => setStatus("❌ Backend Unreachable"));
+  }, []);
+
+  return (
+    <div className="text-center text-sm py-1 bg-gray-100 border-b border-gray-300 text-gray-800">
+      {status}
+    </div>
+  );
+}
+
+  // Only show banner in development mode
 function Protected({ children }) {
   const { user } = useContext(AuthContext);
   if (!user) return <Navigate to="/login" />;
@@ -74,6 +97,7 @@ function Footer() {
 export default function App() {
   return (
     <AuthProvider>
+      <DebugBanner />
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col justify-between">
         <div>
           <Navbar />
