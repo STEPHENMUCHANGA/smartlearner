@@ -40,7 +40,12 @@ async function seed() {
     const courses = [
       { title: 'AI Basics', description: 'Introduction to AI concepts and applications.', instructor: ann._id, tags: ['AI','ML'] },
       { title: 'Full Stack Web Development', description: 'Modern web development using React, Node.js, and MongoDB.', instructor: carol._id, tags: ['Web','Frontend','Backend'] },
-      { title: 'Agricultural Technology', description: 'Using AI and IoT to revolutionize agriculture.', instructor: peter._id, tags: ['AgriTech','Sustainability'] }
+      { title: 'Agricultural Technology', description: 'Using AI and IoT to revolutionize agriculture.', instructor: peter._id, tags: ['AgriTech','Sustainability'] },
+      { title: 'Digital Marketing', description: 'Strategies for online marketing and brand promotion.', instructor: carol._id, tags: ['Marketing','SEO','Social Media'] },
+      { titlte: 'Data Science Fundamentals', description: 'Data analysis, visualization, and machine learning techniques.', instructor: ann._id, tags: ['Data Science','Python','R'] },
+      { title: 'Cybersecurity Essentials', description: 'Protecting systems and data from cyber threats.', instructor: peter._id, tags: ['Security','Networking'] },
+      { title: 'Cloud Computing', description: 'Introduction to cloud services and architecture.', instructor: carol._id, tags: ['Cloud','AWS','Azure'] },
+      { title: 'Mobile App Development', description: 'Building mobile applications for Android and iOS.', instructor: ann._id, tags: ['Mobile','iOS','Android'] }
     ];
 
     const createdCourses = await Course.insertMany(courses);
