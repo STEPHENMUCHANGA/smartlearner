@@ -21,7 +21,7 @@ export default function Register() {
 
   return (
     <div className='max-w-md mx-auto bg-white p-6 rounded shadow'>
-      <h2 className='text-xl font-semibold mb-4'>Register</h2>
+      <h2 className='text-xl font-semibold mb-4'>Register/Sign Up</h2>
       <form onSubmit={submit} className='space-y-3'>
         <input value={name} onChange={e => setName(e.target.value)} className='w-full p-2 border rounded' placeholder='Full name' />
         <input value={email} onChange={e => setEmail(e.target.value)} className='w-full p-2 border rounded' placeholder='Email' />

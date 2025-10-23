@@ -6,9 +6,14 @@
 @import "tailwindcss/utilities";
 /* stylelint-enable at-rule-no-unknown */
 
-/* Optional: custom global styles */
+/* Custom global styles */
 body {
-  background-color: rgb(249, 250, 251);
-  color: rgb(17, 24, 39);
-  font-family: ui-sans-serif, system-ui, sans-serif;
+  background-color: #F9FAFB; /* bg-gray-50 */
+  color: #1F2937; /* text-gray-800 */
+}
+
+/* Dark mode (applies when a parent .dark class is present) */
+.dark body {
+  background-color: #111827; /* bg-gray-900 */
+  color: #F3F4F6; /* text-gray-100 */
 }

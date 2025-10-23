@@ -17,7 +17,7 @@ export default function Dashboard(){
       <div className='flex justify-between items-center'>
         <h2 className='text-xl font-semibold'>Dashboard</h2>
         <div>
-          <span className='mr-3'>Hello Smart Learner, {user?.name}</span>
+          <span className='mr-3'>Welcome to SmartLearner, {user?.name}</span>
           <button onClick={logout} className='px-3 py-1 border rounded'>Logout</button>
         </div>
       </div>
