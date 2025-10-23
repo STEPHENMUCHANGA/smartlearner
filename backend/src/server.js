@@ -35,17 +35,16 @@ const allowedOrigins = [
 // Dynamic & strict CORS policy
 app.use(
   cors({
-    origin: function (origin, callback) {
-      if (!origin) return callback(null, true); // Allow Postman & internal tools
-      if (allowedOrigins.includes(origin)) return callback(null, true);
-      console.warn(`🚫 CORS Blocked Request from: ${origin}`);
-      return callback(new Error("CORS policy violation"), false);
-    },
+    origin: [
+      "http://localhost:5173",                     // local frontend
+      "https://smartlearner-stephen.vercel.app"    // your production frontend
+    ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
 
 // ======================================
 // ✅ 3. Request Logger (for debugging)
