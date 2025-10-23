@@ -11,6 +11,9 @@ const cookieParser = require("cookie-parser");
 const path = require("path");
 const passport = require("passport");
 
+// Log file path for verification
+console.log("✅ Auth routes file path loaded");
+
 // Load Passport config
 require("./config/passport");
 
@@ -40,9 +43,9 @@ app.use(passport.initialize());
 // ======================================
 // ✅ API Routes
 // ======================================
-const authRoutes = require("./routes/auth");
-const courseRoutes = require("./routes/courses");
-const lessonRoutes = require("./routes/lessons");
+const authRoutes = require("./src/routes/auth");
+const courseRoutes = require("./src/routes/courses");
+const lessonRoutes = require("./src/routes/lessons");
 
 app.use("/api/auth", authRoutes);
 app.use("/api/courses", courseRoutes);

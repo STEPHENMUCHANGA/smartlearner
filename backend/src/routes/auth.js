@@ -96,30 +96,38 @@ router.post(
 // ===============================
 // ✅ GOOGLE AUTH (optional)
 // ===============================
+// ✅ GOOGLE AUTH ROUTES
+router.get(
+  "/google",
+  passport.authenticate("google", { scope: ["profile", "email"] })
+);
+
 router.get(
   "/google/callback",
   passport.authenticate("google", { session: false }),
-  (req, res) => {
-    const data = req.user; // Passport sends { user, token }
-    if (!data || !data.user) {
-      return res.status(400).json({ success: false, message: "Google login failed" });
+  async (req, res) => {
+    try {
+      const { user } = req;
+      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
+
+      const redirectBase =
+        process.env.NODE_ENV === "production"
+          ? process.env.FRONTEND_URL_PROD
+          : process.env.FRONTEND_URL;
+
+      const redirectUrl = `${redirectBase}/login?token=${token}&user=${encodeURIComponent(
+        JSON.stringify({
+          id: user._id,
+          name: user.name,
+          email: user.email,
+        })
+      )}`;
+
+      res.redirect(redirectUrl);
+    } catch (err) {
+      console.error("Google callback error:", err);
+      res.redirect(`${process.env.FRONTEND_URL}/login?error=oauth_failed`);
     }
-
-    const { user, token } = data;
-    const redirectBase =
-      process.env.NODE_ENV === "production"
-        ? process.env.FRONTEND_URL_PROD
-        : process.env.FRONTEND_URL;
-
-    const redirectUrl = `${redirectBase}/login?token=${token}&user=${encodeURIComponent(
-      JSON.stringify({
-        id: user._id,
-        name: user.name,
-        email: user.email,
-      })
-    )}`;
-
-    return res.redirect(redirectUrl);
   }
 );
 
