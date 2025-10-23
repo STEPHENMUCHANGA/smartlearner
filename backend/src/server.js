@@ -1,5 +1,5 @@
 // ======================================
-// 🌱 SMARTLEARNER BACKEND SERVER (WORKING VERSION)
+// 🌱 SMARTLEARNER BACKEND SERVER (FINAL PRODUCTION VERSION)
 // ======================================
 
 // Load environment variables
@@ -11,10 +11,6 @@ const cookieParser = require("cookie-parser");
 const path = require("path");
 const passport = require("passport");
 
-// Log file path for verification
-console.log("✅ Auth routes file path loaded");
-
-
 // Load Passport config
 require("./config/passport");
 
@@ -22,33 +18,60 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // ======================================
-// ✅ Middleware Configuration
+// ✅ 1. Express & Proxy Configuration
 // ======================================
+app.set("trust proxy", 1); // Required for Render & Vercel proxies
 app.use(express.json());
 app.use(cookieParser());
 
-// ✅ Simplified CORS (localhost + production)
+// ======================================
+// ✅ 2. CORS Configuration
+// ======================================
+const allowedOrigins = [
+  process.env.FRONTEND_URL || "http://localhost:5173",
+  process.env.FRONTEND_URL_PROD || "https://smartlearner.vercel.app",
+];
+
+// Dynamic & strict CORS policy
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      "https://smartlearner.vercel.app",
-    ],
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true); // Allow Postman & internal tools
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      console.warn(`🚫 CORS Blocked Request from: ${origin}`);
+      return callback(new Error("CORS policy violation"), false);
+    },
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
-// routers maps to routes files
+// ======================================
+// ✅ 3. Request Logger (for debugging)
+// ======================================
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
+  next();
+});
+
+// Initialize Passport for OAuth
+app.use(passport.initialize());
+
+// ======================================
+// ✅ 4. Route Imports
+// ======================================
 const authRoutes = require("./routes/auth");
 const courseRoutes = require("./routes/courses");
 const lessonRoutes = require("./routes/lessons");
 
+// Map routes
 app.use("/api/auth", authRoutes);
 app.use("/api/courses", courseRoutes);
 app.use("/api/lessons", lessonRoutes);
 
 // ======================================
-// ✅ Static Files
+// ✅ 5. Static File Handling
 // ======================================
 app.use(
   "/uploads",
@@ -56,27 +79,39 @@ app.use(
 );
 
 // ======================================
-// ✅ Health Check
+// ✅ 6. Health Check & Test Routes
 // ======================================
 app.get("/api", (req, res) => {
   res.json({
+    success: true,
     message: "✅ SmartLearner API is running successfully",
     environment: process.env.NODE_ENV || "development",
+    allowedOrigins,
+    timestamp: new Date().toISOString(),
+  });
+});
+
+// Simple test route for verifying deployment
+app.get("/api/test", (req, res) => {
+  res.json({
+    message: "🚀 SmartLearner backend test route is working correctly!",
+    time: new Date().toISOString(),
   });
 });
 
 // ======================================
-// ✅ Error Handler
+// ✅ 7. Error Handling Middleware
 // ======================================
 app.use((err, req, res, next) => {
-  console.error("Error:", err.message);
-  res
-    .status(err.status || 500)
-    .json({ success: false, message: err.message || "Server error" });
+  console.error("❌ Error:", err.message);
+  res.status(err.status || 500).json({
+    success: false,
+    message: err.message || "Server error",
+  });
 });
 
 // ======================================
-// ✅ MongoDB Connection
+// ✅ 8. MongoDB Connection
 // ======================================
 mongoose
   .connect(process.env.MONGO_URI, {
@@ -85,15 +120,18 @@ mongoose
   })
   .then(() => {
     console.log("✅ MongoDB connected successfully");
-    app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+    app.listen(PORT, () => {
+      console.log(`🚀 SmartLearner backend running on port ${PORT}`);
+      console.log(`🌐 Accessible at: http://localhost:${PORT}/api`);
+    });
   })
   .catch((err) => {
-    console.error("❌ DB connection error:", err.message);
+    console.error("❌ Database connection error:", err.message);
     process.exit(1);
   });
 
 // ======================================
-// ✅ Graceful Shutdown
+// ✅ 9. Graceful Shutdown
 // ======================================
 process.on("SIGINT", async () => {
   console.log("🛑 Gracefully shutting down...");
