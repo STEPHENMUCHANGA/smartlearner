@@ -98,8 +98,7 @@ router.post(
 // ===============================
 // ✅ GOOGLE AUTH ROUTES
 router.get(
-  "/google",
-  passport.authenticate("google", { scope: ["profile", "email"] })
+  "/google", passport.authenticate("google", { scope: ["profile", "email"] })
 );
 
 router.get(
