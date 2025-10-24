@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: smartlearner-backend
+    env: node
+    plan: free
+    buildCommand: "npm install"
+    startCommand: "npm start"
+    envVars:
+      - key: MONGO_URI
+      - key: FRONTEND_URL
+      - key: FRONTEND_URL_PROD
+      - key: NODE_ENV
+      - key: UPLOAD_DIR
