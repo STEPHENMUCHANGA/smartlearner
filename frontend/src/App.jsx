@@ -8,8 +8,6 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import { AuthProvider, AuthContext } from './context/AuthContext';
 
-// DebugBanner component to show backend connection status
-import React, { useEffect, useState } from "react";
 
 function DebugBanner() {
   const [status, setStatus] = useState("Checking...");
