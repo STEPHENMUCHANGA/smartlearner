@@ -12,7 +12,7 @@ const path = require("path");
 const passport = require("passport");
 
 // Load Passport config
-require("./config/passport");
+// require("./config/passport");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
