@@ -38,16 +38,17 @@ const allowedOrigins = [
 
 app.use(
   cors({
-    origin: function (origin, callback) {
-      console.log("CORS requestfrom:", origin);
-      if (!origin) return callback(null, true); // allow tools/curl/no origin
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      } else {
-        console.warn(`❌ CORS blocked: ${origin}`);
-        return callback(new Error(`Not allowed by CORS: ${origin}`));
-      }
-    },
+    // origin: function (origin, callback) {
+    //   console.log("CORS requestfrom:", origin);
+    //   if (!origin) return callback(null, true); // allow tools/curl/no origin
+    //   if (allowedOrigins.includes(origin)) {
+    //     return callback(null, true);
+    //   } else {
+    //     console.warn(`❌ CORS blocked: ${origin}`);
+    //     return callback(new Error(`Not allowed by CORS: ${origin}`));
+    //   }
+    // },
+    origin: '*',
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
