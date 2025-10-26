@@ -28,18 +28,28 @@ app.use(cookieParser());
 // ✅ 2. CORS Configuration (Improved & Strict Whitelist)
 // ======================================
 const allowedOrigins = [
-  'http://localhost:5173',              // Vite local dev
+  'http://localhost:5173',              // Local dev
   'http://127.0.0.1:5173',              // Alternative localhost
-  'https://smartlearner-stephens-projects.vercel.app', // Vercel preview
-  'https://smartlearner-frontend.vercel.app/', // Deployed frontend
-  'https://smartlearner-8tgb.onrender.com',
-  process.env.FRONTEND_URL,             // Optional custom env URL
-  process.env.FRONTEND_URL_PROD,        // Optional production env URL
-].filter(Boolean); // removes undefined values
+  'https://smartlearner-stephen.vercel.app', // ✅ Your deployed frontend
+  'https://smartlearner-frontend.vercel.app', // Optional secondary frontend
+  process.env.FRONTEND_URL,             // Optional env URLs
+  process.env.FRONTEND_URL_PROD,
+].filter(Boolean);
 
 app.use(cors({
-  origin: '*',
-  credentials: true,
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like Postman)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      console.log("❌ Blocked by CORS:", origin);
+      return callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true, // ✅ Required for cookies or auth headers
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
 }));
 app.use(express.json());
 
