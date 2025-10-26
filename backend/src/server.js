@@ -32,6 +32,7 @@ const allowedOrigins = [
   'http://127.0.0.1:5173',              // Alternative localhost
   'https://smartlearner-stephen.vercel.app', // ✅ Your deployed frontend
   'https://smartlearner-frontend.vercel.app', // Optional secondary frontend
+  'https://smartlearner-8tgb.onrender.com/api', // ✅ Your deployed backend
   process.env.FRONTEND_URL,             // Optional env URLs
   process.env.FRONTEND_URL_PROD,
 ].filter(Boolean);
