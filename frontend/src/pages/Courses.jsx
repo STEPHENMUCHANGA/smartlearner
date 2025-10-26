@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import api from "../api";
 
-export default function Courses() {
+export default function CoursesDetail() {
+  const { id } = useParams();
   const [courses, setCourses] = useState([]);
   const [error, setError] = useState(null);
 
