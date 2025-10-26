@@ -30,8 +30,8 @@ app.use(cookieParser());
 const allowedOrigins = [
   'http://localhost:5173',              // Vite local dev
   'http://127.0.0.1:5173',              // Alternative localhost
-  //'https://smartlearner-stephens-projects.vercel.app', // Vercel preview
-  'https://smartlearner-frontend.vercel.app', // Deployed frontend
+  'https://smartlearner-stephens-projects.vercel.app', // Vercel preview
+  'https://smartlearner-frontend.vercel.app/', // Deployed frontend
   'https://smartlearner-8tgb.onrender.com',
   process.env.FRONTEND_URL,             // Optional custom env URL
   process.env.FRONTEND_URL_PROD,        // Optional production env URL
@@ -39,22 +39,23 @@ const allowedOrigins = [
 
 app.use(
   cors({
-    // origin: function (origin, callback) {
-    //   console.log("CORS requestfrom:", origin);
-    //   if (!origin) return callback(null, true); // allow tools/curl/no origin
-    //   if (allowedOrigins.includes(origin)) {
-    //     return callback(null, true);
-    //   } else {
-    //     console.warn(`❌ CORS blocked: ${origin}`);
-    //     return callback(new Error(`Not allowed by CORS: ${origin}`));
-    //   }
-    // },
-    origin: '*',
+    origin: function (origin, callback) {
+      console.log("CORS request from :", origin);
+    if (!origin) return callback(null, true); // allow tools/curl/no origin
+    if (allowedOrigins.includes(origin)) {
+    return callback(null, true);
+    } else {
+      console.warn(`❌ CORS blocked: ${origin}`);
+      return callback(new Error(`Not allowed by CORS: ${origin}`));
+    }
+  },
+  origin: '*',
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+app.use(express.json());
 
 
 // ✅ 3. Request Logger (for debugging)
