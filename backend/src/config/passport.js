@@ -1,7 +1,13 @@
+require("dotenv").config();
 const passport = require("passport");
 const { Strategy: GoogleStrategy } = require("passport-google-oauth20");
 const User = require("../models/User");
 const jwt = require("jsonwebtoken");
+
+// Ensure Google OAuth credentials are set
+if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+  console.error("❌ Google OAuth credentials missing! Check your .env file.");
+}
 
 passport.use(
   new GoogleStrategy(

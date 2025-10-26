@@ -12,7 +12,7 @@ const path = require("path");
 const passport = require("passport");
 
 // Load Passport config
-// require("./config/passport");
+require("./config/passport.js");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -25,30 +25,33 @@ app.use(express.json());
 app.use(cookieParser());
 
 // ======================================
-// ======================================
-// ✅ 2. CORS Configuration (dynamic)
+// ✅ 2. CORS Configuration (Improved & Strict Whitelist)
 // ======================================
 const allowedOrigins = [
-  process.env.FRONTEND_URL || 'http://localhost:5173',
-  process.env.FRONTEND_URL_PROD || 'https://your-frontend.example.com',
-];
+  'http://localhost:5173',              // Vite local dev
+  'http://127.0.0.1:5173',              // Alternative localhost
+  'https://smartlearner-frontend.vercel.app', // Deployed frontend
+  process.env.FRONTEND_URL,             // Optional custom env URL
+  process.env.FRONTEND_URL_PROD,        // Optional production env URL
+].filter(Boolean); // removes undefined values
 
-// Dynamic & strict CORS policy that respects environment variables
 app.use(
   cors({
-    origin: function(origin, callback) {
-      // Allow requests with no origin (like mobile apps or curl)
-      if (!origin) return callback(null, true);
-      const allowed = allowedOrigins.concat((process.env.ADDITIONAL_ALLOWED_ORIGINS || '').split(',').filter(Boolean));
-      if (allowed.indexOf(origin) !== -1) {
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true); // allow tools/curl/no origin
+      if (allowedOrigins.includes(origin)) {
         return callback(null, true);
+      } else {
+        console.warn(`❌ CORS blocked: ${origin}`);
+        return callback(new Error(`Not allowed by CORS: ${origin}`));
       }
-      return callback(new Error('Not allowed by CORS'));
     },
     credentials: true,
-    methods: ['GET','POST','PUT','DELETE','OPTIONS'],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
 
 // ✅ 3. Request Logger (for debugging)
 // ======================================
