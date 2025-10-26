@@ -30,7 +30,7 @@ app.use(cookieParser());
 const allowedOrigins = [
   'http://localhost:5173',              // Vite local dev
   'http://127.0.0.1:5173',              // Alternative localhost
-  'https://smartlearner-stephens-projects.vercel.app', // Vercel preview
+  //'https://smartlearner-stephens-projects.vercel.app', // Vercel preview
   'https://smartlearner-frontend.vercel.app', // Deployed frontend
   process.env.FRONTEND_URL,             // Optional custom env URL
   process.env.FRONTEND_URL_PROD,        // Optional production env URL
