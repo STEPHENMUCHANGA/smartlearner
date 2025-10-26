@@ -37,23 +37,18 @@ const allowedOrigins = [
   process.env.FRONTEND_URL_PROD,        // Optional production env URL
 ].filter(Boolean); // removes undefined values
 
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      console.log("CORS request from :", origin);
-    if (!origin) return callback(null, true); // allow tools/curl/no origin
-    if (allowedOrigins.includes(origin)) {
-    return callback(null, true);
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true); // ✅ allow
     } else {
-      console.warn(`❌ CORS blocked: ${origin}`);
-      return callback(new Error(`Not allowed by CORS: ${origin}`));
+      callback(new Error("Not allowed by CORS")); // ❌ reject others
     }
   },
-  origin: '*',
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+})
 );
 app.use(express.json());
 

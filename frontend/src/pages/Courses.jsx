@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from 'react-router-dom';
-import { Link } from "react-router-dom";
-import api from "../api";
+import { useParams, Link } from "react-router-dom";
+import axios from "axios";
 
 export default function CoursesDetail() {
   const { id } = useParams();
@@ -9,8 +8,10 @@ export default function CoursesDetail() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    api
-      .get("/courses")
+    axios
+      .get("https://smartlearner-8tgb.onrender.com/api/courses", {
+        withCredentials: true, // ✅ only if backend needs cookies/sessions
+      })
       .then((res) => setCourses(res.data))
       .catch((err) => {
         console.error("❌ Fetch error:", err);
@@ -18,10 +19,13 @@ export default function CoursesDetail() {
       });
   }, []);
 
-  if (error)
+  if (error) {
     return (
-      <div className="text-center text-red-600 mt-10 font-semibold">{error}</div>
+      <div className="text-center text-red-600 mt-10 font-semibold">
+        {error}
+      </div>
     );
+  }
 
   return (
     <div className="max-w-4xl mx-auto p-4">
@@ -53,4 +57,4 @@ export default function CoursesDetail() {
       </div>
     </div>
   );
-}
+};
